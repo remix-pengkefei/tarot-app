@@ -1,0 +1,97 @@
+
+> tarot-backend@1.0.0 dev
+> tsx watch src/index.ts
+
+Using OpenAI service
+Server is running on port 3001
+OpenAI Assistant API error: OpenAIError: Path parameters result in path with invalid segments:
+Value of type Undefined is not a valid path parameter
+/threads/undefined/runs/thread_GbcN0YNOG4WaOfS0zJPMbSQX
+         ^^^^^^^^^
+    at path (/Users/remix.fly/Desktop/tarot/backend/node_modules/openai/src/internal/utils/path.ts:75:13)
+    at Runs.retrieve (/Users/remix.fly/Desktop/tarot/backend/node_modules/openai/src/resources/beta/threads/runs/runs.ts:88:33)
+    at Object.analyzeQuestion (/Users/remix.fly/Desktop/tarot/backend/src/services/openai.service.ts:60:52)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async Object.analyzeQuestionAndRecommendSpread (/Users/remix.fly/Desktop/tarot/backend/src/services/divination.service.ts:28:22)
+    at async <anonymous> (/Users/remix.fly/Desktop/tarot/backend/src/routes/divination.routes.ts:16:20)
+OpenAI Assistant API error (interpretCard): OpenAIError: Path parameters result in path with invalid segments:
+Value of type Undefined is not a valid path parameter
+/threads/undefined/runs/thread_bQAgP1WaNO3QUNB72qb8uuen
+         ^^^^^^^^^
+    at path (/Users/remix.fly/Desktop/tarot/backend/node_modules/openai/src/internal/utils/path.ts:75:13)
+    at Runs.retrieve (/Users/remix.fly/Desktop/tarot/backend/node_modules/openai/src/resources/beta/threads/runs/runs.ts:88:33)
+    at Object.interpretCard (/Users/remix.fly/Desktop/tarot/backend/src/services/openai.service.ts:119:52)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async <anonymous> (/Users/remix.fly/Desktop/tarot/backend/src/services/divination.service.ts:76:32)
+    at async Promise.all (index 0)
+    at async Object.drawAndInterpretCards (/Users/remix.fly/Desktop/tarot/backend/src/services/divination.service.ts:65:29)
+    at async <anonymous> (/Users/remix.fly/Desktop/tarot/backend/src/routes/divination.routes.ts:36:20)
+16:17:35 [tsx] change in ./src/services/openai.service.ts Restarting...
+c16:17:36 [tsx] change in ./src/services/openai.service.ts Restarting...
+cUsing OpenAI service
+Server is running on port 3001
+16:17:52 [tsx] change in ./src/services/openai.service.ts Restarting...
+cUsing OpenAI service
+Server is running on port 3001
+16:17:55 [tsx] change in ./src/services/openai.service.ts Restarting...
+c16:17:55 [tsx] change in ./src/services/openai.service.ts Restarting...
+cUsing OpenAI service
+Server is running on port 3001
+16:17:59 [tsx] change in ./src/services/openai.service.ts Restarting...
+c16:17:59 [tsx] change in ./src/services/openai.service.ts Restarting...
+c16:17:59 [tsx] change in ./src/services/openai.service.ts Restarting...
+c16:17:59 [tsx] change in ./src/services/openai.service.ts Restarting...
+c16:17:59 [tsx] change in ./src/services/openai.service.ts Restarting...
+Using OpenAI service
+Server is running on port 3001
+cUsing OpenAI service
+Server is running on port 3001
+16:18:05 [tsx] change in ./src/services/openai.service.ts Restarting...
+cUsing OpenAI service
+Server is running on port 3001
+16:37:10 [tsx] change in ./src/services/openai.service.ts Restarting...
+cUsing OpenAI service
+Server is running on port 3001
+Unexpected error: PrismaClientValidationError: 
+Invalid `prisma.divination.create()` invocation in
+/Users/remix.fly/Desktop/tarot/backend/src/services/divination.service.ts:31:48
+
+  28 const analysis = await aiService.analyzeQuestion(question, spreads);
+  29 
+  30 // Create divination record
+→ 31 const divination = await prisma.divination.create({
+       data: {
+         question: "我下午应该去游泳吗？",
+         spreadId: "单张牌阵",
+                   ~~~~~~
+         questionAnalysis: "你正在考虑一个简单的决策，即是否在下午去游泳。这是一个关于如何度过你一天的小选择，而不是一个复杂或深远的人生问题。",
+         spreadRecommendation: "单张牌阵适合提供快速的指引和简单的决策。这种牌阵可以给你一个直接的答案或指引，帮助你决定是否在下午去游泳。"
+       },
+       include: {
+         spread: true
+       }
+     })
+
+Argument `spreadId`: Invalid value provided. Expected Int, provided String.
+    at wn (/Users/remix.fly/Desktop/tarot/backend/node_modules/@prisma/client/runtime/library.js:29:1363)
+    at $n.handleRequestError (/Users/remix.fly/Desktop/tarot/backend/node_modules/@prisma/client/runtime/library.js:121:6958)
+    at $n.handleAndLogRequestError (/Users/remix.fly/Desktop/tarot/backend/node_modules/@prisma/client/runtime/library.js:121:6623)
+    at $n.request (/Users/remix.fly/Desktop/tarot/backend/node_modules/@prisma/client/runtime/library.js:121:6307)
+    at async l (/Users/remix.fly/Desktop/tarot/backend/node_modules/@prisma/client/runtime/library.js:130:9633)
+    at async Object.analyzeQuestionAndRecommendSpread (/Users/remix.fly/Desktop/tarot/backend/src/services/divination.service.ts:31:24)
+    at async <anonymous> (/Users/remix.fly/Desktop/tarot/backend/src/routes/divination.routes.ts:16:20) {
+  clientVersion: '5.22.0'
+}
+16:39:16 [tsx] change in ./src/services/openai.service.ts Restarting...
+c16:39:16 [tsx] change in ./src/services/openai.service.ts Restarting...
+Using OpenAI service
+Server is running on port 3001
+cUsing OpenAI service
+Server is running on port 3001
+16:39:21 [tsx] change in ./src/services/openai.service.ts Restarting...
+cUsing OpenAI service
+Server is running on port 3001
+16:39:21 [tsx] change in ./src/services/openai.service.ts Restarting...
+c16:39:21 [tsx] change in ./src/services/openai.service.ts Restarting...
+cUsing OpenAI service
+Server is running on port 3001

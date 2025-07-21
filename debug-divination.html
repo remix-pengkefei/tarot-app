@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>调试占卜流程</title>
+    <meta charset="UTF-8">
+    <style>
+        body { font-family: monospace; padding: 20px; }
+        button { margin: 5px; padding: 10px; }
+        pre { background: #f0f0f0; padding: 10px; overflow: auto; }
+        .success { color: green; }
+        .error { color: red; }
+    </style>
+</head>
+<body>
+    <h1>调试占卜流程</h1>
+    
+    <button onclick="testFullFlow()">测试完整流程</button>
+    <button onclick="clearLog()">清空日志</button>
+    
+    <div id="log"></div>
+
+    <script>
+        const log = (msg, type = 'info') => {
+            const logDiv = document.getElementById('log');
+            const entry = document.createElement('div');
+            entry.className = type;
+            entry.innerHTML = `[${new Date().toLocaleTimeString()}] ${msg}`;
+            logDiv.appendChild(entry);
+        };
+
+        const clearLog = () => {
+            document.getElementById('log').innerHTML = '';
+        };
+
+        const testFullFlow = async () => {
+            try {
+                log('开始测试占卜流程...');
+                
+                // 1. 创建占卜
+                log('1. 创建占卜会话...');
+                const startRes = await fetch('http://localhost:3001/api/divination/start', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ question: '我的工作会有进展吗？' })
+                });
+                const divination = await startRes.json();
+                log(`✅ 占卜ID: ${divination.id}`, 'success');
+                log(`推荐牌阵: ${divination.spread.name} (${divination.spread.cardCount}张牌)`);
+                
+                // 2. 抽牌
+                log('2. 抽取塔罗牌...');
+                const drawnCards = [
+                    { cardId: 1, position: '过去', isReversed: false },
+                    { cardId: 2, position: '现在', isReversed: true },
+                    { cardId: 3, position: '未来', isReversed: false }
+                ];
+                
+                const drawRes = await fetch('http://localhost:3001/api/divination/draw-cards', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        divinationId: divination.id,
+                        drawnCards: drawnCards
+                    })
+                });
+                const drawResult = await drawRes.json();
+                log(`✅ 抽牌完成`, 'success');
+                log('返回的数据结构：');
+                log(`<pre>${JSON.stringify(drawResult, null, 2)}</pre>`);
+                
+                // 3. 检查数据
+                log('3. 检查数据结构...');
+                if (drawResult.divination && drawResult.divination.divinationCards) {
+                    log(`✅ divinationCards存在，包含 ${drawResult.divination.divinationCards.length} 张牌`, 'success');
+                } else {
+                    log('❌ divinationCards不存在！', 'error');
+                }
+                
+                // 4. 获取完整结果
+                log('4. 获取完整占卜结果...');
+                const resultRes = await fetch(`http://localhost:3001/api/divination/${divination.id}`);
+                const fullResult = await resultRes.json();
+                log('完整结果：');
+                log(`<pre>${JSON.stringify(fullResult, null, 2)}</pre>`);
+                
+            } catch (error) {
+                log(`❌ 错误: ${error.message}`, 'error');
+            }
+        };
+    </script>
+</body>
+</html>

@@ -1,0 +1,58 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  * {
+    @apply border-gray-900;
+  }
+  
+  html {
+    font-family: 'Courier New', monospace;
+  }
+  
+  body {
+    @apply bg-white text-black;
+  }
+}
+
+@layer components {
+  /* 简单的线框按钮 */
+  .btn-wireframe {
+    @apply border-2 border-black bg-white text-black px-4 py-2 
+           hover:bg-black hover:text-white transition-colors;
+  }
+  
+  /* 简单的卡片容器 */
+  .wireframe-card {
+    @apply border-2 border-black p-4 bg-white;
+  }
+  
+  /* 输入框 */
+  .wireframe-input {
+    @apply border-2 border-black p-2 w-full bg-white focus:outline-none;
+  }
+  
+  /* 塔罗牌样式 */
+  .wireframe-tarot-card {
+    @apply w-20 h-32 border-2 border-black bg-white 
+           hover:bg-gray-100 cursor-pointer transition-colors
+           flex items-center justify-center text-xs;
+  }
+  
+  .wireframe-tarot-card-selected {
+    @apply bg-black text-white;
+  }
+}
+
+/* 移除所有圆角和阴影 */
+* {
+  border-radius: 0 !important;
+  box-shadow: none !important;
+}
+
+/* 简单的标题样式 */
+h1 { @apply text-2xl font-bold mb-4; }
+h2 { @apply text-xl font-bold mb-3; }
+h3 { @apply text-lg font-bold mb-2; }
+p { @apply mb-2; }
