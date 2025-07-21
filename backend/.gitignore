@@ -1,0 +1,10 @@
+node_modules/
+dist/
+.env
+.env.local
+.env.production
+*.log
+prisma/*.db
+prisma/*.db-journal
+prisma/migrations/
+.DS_Store
