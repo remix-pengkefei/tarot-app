@@ -19,6 +19,12 @@ interface InterpretCardParams {
 interface AIService {
   analyzeQuestion(question: string, availableSpreads: Spread[]): Promise<AnalyzeQuestionResult>;
   interpretCard(params: InterpretCardParams): Promise<string>;
+  generateSummary(question: string, cards: Array<{
+    card: TarotCard;
+    position: string;
+    isReversed: boolean;
+    interpretation: string;
+  }>): Promise<string>;
 }
 
 // 根据环境变量选择 AI 服务

@@ -132,6 +132,16 @@ const ResultPage = () => {
           ))}
         </div>
         
+        {/* 总结性解读 */}
+        {currentDivination.summary && (
+          <div className="wireframe-card mt-6">
+            <h2 className="text-xl font-bold mb-4">整体洞察</h2>
+            <div className="whitespace-pre-wrap leading-relaxed">
+              {currentDivination.summary}
+            </div>
+          </div>
+        )}
+        
       <div className="mt-8 text-center">
         <button
           onClick={handleNewDivination}

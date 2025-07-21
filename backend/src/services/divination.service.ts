@@ -96,6 +96,27 @@ export const divinationService = {
       })
     );
 
+    // 生成总结（仅适用于多张牌）
+    let summary = '';
+    if (interpretations.length > 1) {
+      const cardsForSummary = interpretations.map(interp => ({
+        card: interp.card,
+        position: interp.position,
+        isReversed: interp.isReversed,
+        interpretation: interp.interpretation
+      }));
+      
+      summary = await aiService.generateSummary(divination.question, cardsForSummary);
+      
+      // 更新占卜记录，添加总结
+      if (summary) {
+        await prisma.divination.update({
+          where: { id: divinationId },
+          data: { summary }
+        });
+      }
+    }
+
     // 获取更新后的完整占卜数据
     const updatedDivination = await prisma.divination.findUnique({
       where: { id: divinationId },

@@ -29,6 +29,7 @@ export interface Divination {
   spreadId: number;
   questionAnalysis: string;
   spreadRecommendation: string;
+  summary?: string;
   spread: Spread;
   divinationCards?: DivinationCard[];
   createdAt: string;

@@ -111,6 +111,60 @@ ${availableSpreads.map(spread => `
     }
   },
 
+  async generateSummary(question: string, cards: Array<{
+    card: TarotCard;
+    position: string;
+    isReversed: boolean;
+    interpretation: string;
+  }>): Promise<string> {
+    try {
+      // 只为多张牌生成总结
+      if (cards.length <= 1) {
+        return '';
+      }
+
+      const cardsDescription = cards.map(c => 
+        `- ${c.card.name}（${c.isReversed ? '逆位' : '正位'}）在"${c.position}"位置`
+      ).join('\n');
+
+      const prompt = `你是一位温柔且富有洞察力的塔罗占卜师。请基于以下占卜结果，为用户提供一个整体性的总结解读。
+
+用户的问题："${question}"
+
+抽到的塔罗牌：
+${cardsDescription}
+
+请综合所有抽到的牌，围绕用户的问题写一段总结性的解读（200-300字）。
+
+这段总结应包括：
+1. 所有牌之间的联系与互动（例如：象征层面、倾向、张力）
+2. 回应用户的问题本质，提炼核心洞察
+3. 提供温柔、有智慧、具有方向性的建议，鼓励用户内在觉察
+
+语气柔和有同理心，避免直接给出"好/坏"的结论，而是引导用户理解潜藏的含义与可能性。`;
+
+      const response = await anthropic.messages.create({
+        model: 'claude-3-haiku-20240307',
+        max_tokens: 600,
+        messages: [{
+          role: 'user',
+          content: prompt
+        }]
+      });
+
+      const content = response.content[0];
+      if (content.type !== 'text') {
+        throw new AppError(500, 'Unexpected response from Claude');
+      }
+
+      return content.text;
+    } catch (error) {
+      console.error('Claude API error (generateSummary):', error);
+      // Fallback summary - reuse the same logic as OpenAI
+      return this.getSimpleSummary(question, cards);
+    }
+  },
+
   // Enhanced fallback methods with rich mock data
   getSimpleSpreadRecommendation(question: string, spreads: Spread[]): AnalyzeQuestionResult {
     const questionLower = question.toLowerCase();
@@ -232,5 +286,40 @@ ${availableSpreads.map(spread => `
     }
 
     return interpretation;
+  },
+
+  getSimpleSummary(question: string, cards: Array<{
+    card: TarotCard;
+    position: string;
+    isReversed: boolean;
+    interpretation: string;
+  }>): string {
+    if (cards.length <= 1) return '';
+
+    const cardNames = cards.map(c => c.card.name).join('、');
+    const hasConflict = cards.some(c => c.isReversed);
+    
+    let summary = `在这次占卜中，${cardNames}共同为您的问题提供了多层次的洞察。`;
+    
+    if (hasConflict) {
+      summary += '牌面中既有顺位也有逆位，这暗示着您正处在一个转变的过程中，内在可能存在一些需要平衡的张力。';
+    } else {
+      summary += '所有牌面呈现出和谐的能量流动，指向一个相对清晰的方向。';
+    }
+    
+    summary += '\n\n这些牌共同提醒您，';
+    
+    const questionLower = question.toLowerCase();
+    if (questionLower.includes('爱情') || questionLower.includes('感情')) {
+      summary += '在感情的道路上，真诚与耐心是最重要的品质。聆听内心的声音，同时也要给予关系成长的空间。';
+    } else if (questionLower.includes('工作') || questionLower.includes('事业')) {
+      summary += '职业发展需要结合内在的热情与外在的机遇。保持开放的心态，同时也要相信自己的能力和判断。';
+    } else {
+      summary += '生活的答案往往不是非黑即白的。保持觉察，在变化中寻找属于您的平衡点。';
+    }
+    
+    summary += '请记住，塔罗牌反映的是当下的能量状态，而您始终拥有改变未来的力量。';
+    
+    return summary;
   }
 };
