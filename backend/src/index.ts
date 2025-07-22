@@ -12,29 +12,41 @@ dotenv.config();
 const app = express();
 const PORT = process.env.PORT || 3001;
 
-// Middleware
-const allowedOrigins = [
-  'http://localhost:5173',
-  'http://127.0.0.1:5173',
-  'https://tarot-app-ebon.vercel.app',
-  process.env.CORS_ORIGIN,
-  process.env.FRONTEND_URL
-].filter(Boolean);
+// 手动设置CORS头 - 最彻底的解决方案
+app.use((req, res, next) => {
+  // 允许所有来源
+  res.header('Access-Control-Allow-Origin', '*');
+  
+  // 允许的请求头
+  res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization');
+  
+  // 允许的方法
+  res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+  
+  // 允许credentials
+  res.header('Access-Control-Allow-Credentials', 'true');
+  
+  // 处理预检请求
+  if (req.method === 'OPTIONS') {
+    res.sendStatus(200);
+  } else {
+    next();
+  }
+});
 
-console.log('Allowed CORS origins:', allowedOrigins);
-
-// CORS配置 - 简化版本以确保工作
+// 备用CORS中间件
 app.use(cors({
-  origin: '*', // 临时允许所有来源，稍后可以限制
+  origin: true, // 允许所有来源
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
   optionsSuccessStatus: 200
 }));
 
-console.log('CORS enabled for all origins');
+console.log('CORS configured with manual headers');
 console.log('Environment:', process.env.NODE_ENV);
-console.log('CORS_ORIGIN:', process.env.CORS_ORIGIN);
+console.log('Port:', PORT);
+
 app.use(express.json());
 
 // Routes
@@ -47,9 +59,25 @@ app.get('/api/health', (_req, res) => {
   res.json({ status: 'ok', timestamp: new Date().toISOString() });
 });
 
+// CORS测试端点
+app.get('/api/cors-test', (req, res) => {
+  res.json({ 
+    message: 'CORS test successful',
+    headers: req.headers,
+    origin: req.headers.origin,
+    timestamp: new Date().toISOString()
+  });
+});
+
+// 根路径
+app.get('/', (_req, res) => {
+  res.json({ message: 'Tarot API is running', timestamp: new Date().toISOString() });
+});
+
 // Error handling middleware (must be last)
 app.use(errorHandler);
 
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
+  console.log(`CORS is enabled for all origins`);
 });
