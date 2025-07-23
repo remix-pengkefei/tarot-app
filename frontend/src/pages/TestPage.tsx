@@ -51,7 +51,8 @@ const TestPage = () => {
   const testAPI = async () => {
     try {
       addLog('测试API连接...');
-      const response = await fetch('http://localhost:3001/api/health');
+      const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001/api';
+      const response = await fetch(`${API_BASE_URL.replace('/api', '')}/api/health`);
       const data = await response.json();
       addLog(`✅ API响应: ${JSON.stringify(data)}`);
     } catch (error: any) {

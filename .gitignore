@@ -39,6 +39,8 @@ lerna-debug.log*
 *.sqlite
 *.sqlite3
 backend/prisma/dev.db*
+backend/prisma/prod.db*
+backend/prisma/prisma/
 
 # OS
 .DS_Store

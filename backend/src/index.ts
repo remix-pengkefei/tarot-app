@@ -11,22 +11,32 @@ dotenv.config();
 const app = express();
 const PORT = process.env.PORT || 3001;
 
+// CORS configuration
+const allowedOrigins = process.env.NODE_ENV === 'production' 
+  ? [process.env.CORS_ORIGIN || process.env.FRONTEND_URL].filter(Boolean)
+  : ['http://localhost:5173', 'http://localhost:3000', 'http://127.0.0.1:5173'];
+
 // 强制在每个响应中添加CORS头
 app.use((req: Request, res: Response, next: NextFunction): void => {
+  const origin = req.headers.origin;
+  const allowedOrigin = allowedOrigins.includes(origin as string) ? origin : allowedOrigins[0];
+  
   // 在响应发送前添加CORS头
   const originalSend = res.send;
   res.send = function(data: any) {
-    res.header('Access-Control-Allow-Origin', '*');
+    res.header('Access-Control-Allow-Origin', allowedOrigin || '*');
     res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
     res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization');
+    res.header('Access-Control-Allow-Credentials', 'true');
     return originalSend.call(this, data);
   };
   
   // 处理OPTIONS预检请求
   if (req.method === 'OPTIONS') {
-    res.header('Access-Control-Allow-Origin', '*');
+    res.header('Access-Control-Allow-Origin', allowedOrigin || '*');
     res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
     res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization');
+    res.header('Access-Control-Allow-Credentials', 'true');
     res.sendStatus(200);
     return;
   }
@@ -36,9 +46,12 @@ app.use((req: Request, res: Response, next: NextFunction): void => {
 
 app.use(express.json());
 
-// Routes - 在每个路由响应前也添加CORS头
-app.use((_req: Request, res: Response, next: NextFunction) => {
-  res.header('Access-Control-Allow-Origin', '*');
+// Middleware to set CORS headers for all routes
+app.use((req: Request, res: Response, next: NextFunction) => {
+  const origin = req.headers.origin;
+  const allowedOrigin = allowedOrigins.includes(origin as string) ? origin : allowedOrigins[0];
+  res.header('Access-Control-Allow-Origin', allowedOrigin || '*');
+  res.header('Access-Control-Allow-Credentials', 'true');
   next();
 });
 
