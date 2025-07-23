@@ -1,0 +1,16 @@
+services:
+  - type: web
+    name: tarot-backend
+    runtime: node
+    rootDir: backend
+    buildCommand: ./build.sh
+    startCommand: npm start
+    envVars:
+      - key: DATABASE_URL
+        value: file:./prisma/prod.db
+      - key: AI_SERVICE
+        value: openai
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 10000

@@ -62,6 +62,22 @@ exports.divinationService = {
                 }
             });
         }));
+        let summary = '';
+        if (interpretations.length > 1) {
+            const cardsForSummary = interpretations.map(interp => ({
+                card: interp.card,
+                position: interp.position,
+                isReversed: interp.isReversed,
+                interpretation: interp.interpretation
+            }));
+            summary = await ai_service_1.aiService.generateSummary(divination.question, cardsForSummary);
+            if (summary) {
+                await prisma.divination.update({
+                    where: { id: divinationId },
+                    data: { summary }
+                });
+            }
+        }
         const updatedDivination = await prisma.divination.findUnique({
             where: { id: divinationId },
             include: {

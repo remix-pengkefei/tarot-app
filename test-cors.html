@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test CORS</title>
+</head>
+<body>
+    <h1>CORS Test</h1>
+    <button onclick="testAPI()">Test API</button>
+    <div id="result"></div>
+
+    <script>
+        async function testAPI() {
+            const resultDiv = document.getElementById('result');
+            resultDiv.innerHTML = 'Testing...';
+            
+            try {
+                // Test health endpoint
+                const healthResponse = await fetch('https://tarot-app-production-3381.up.railway.app/api/health');
+                const healthData = await healthResponse.json();
+                
+                resultDiv.innerHTML += '<p>Health check: ' + JSON.stringify(healthData) + '</p>';
+                
+                // Test spreads endpoint
+                const spreadsResponse = await fetch('https://tarot-app-production-3381.up.railway.app/api/spreads');
+                const spreadsData = await spreadsResponse.json();
+                
+                resultDiv.innerHTML += '<p>Spreads loaded: ' + spreadsData.length + ' spreads found</p>';
+                resultDiv.innerHTML += '<p style="color: green;">✅ CORS is working!</p>';
+                
+            } catch (error) {
+                resultDiv.innerHTML += '<p style="color: red;">❌ CORS Error: ' + error.message + '</p>';
+                console.error('Error:', error);
+            }
+        }
+    </script>
+</body>
+</html>

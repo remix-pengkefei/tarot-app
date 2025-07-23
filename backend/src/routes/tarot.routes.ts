@@ -1,11 +1,11 @@
-import { Router } from 'express';
+import { Router, Request, Response } from 'express';
 import { PrismaClient } from '@prisma/client';
 
 const router = Router();
 const prisma = new PrismaClient();
 
 // Get all tarot cards
-router.get('/cards', async (_req, res) => {
+router.get('/cards', async (_req: Request, res: Response) => {
   const cards = await prisma.tarotCard.findMany({
     orderBy: [
       { arcana: 'asc' },
@@ -16,7 +16,7 @@ router.get('/cards', async (_req, res) => {
 });
 
 // Get a specific card
-router.get('/cards/:id', async (req, res) => {
+router.get('/cards/:id', async (req: Request, res: Response) => {
   const card = await prisma.tarotCard.findUnique({
     where: { id: parseInt(req.params.id) }
   });
@@ -29,7 +29,7 @@ router.get('/cards/:id', async (req, res) => {
 });
 
 // Get random cards for shuffling
-router.get('/shuffle', async (req, res) => {
+router.get('/shuffle', async (req: Request, res: Response) => {
   const count = parseInt(req.query.count as string) || 78;
   
   // Get all cards and shuffle them

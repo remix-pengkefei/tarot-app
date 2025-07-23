@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>CORS Debug</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; }
+        .test { margin: 10px 0; padding: 10px; border: 1px solid #ddd; }
+        .success { background-color: #d4edda; }
+        .error { background-color: #f8d7da; }
+        pre { background: #f5f5f5; padding: 10px; overflow-x: auto; }
+    </style>
+</head>
+<body>
+    <h1>CORS 调试工具</h1>
+    <button onclick="runAllTests()">运行所有测试</button>
+    <div id="results"></div>
+
+    <script>
+        const API_URL = 'https://tarot-app-production-3381.up.railway.app';
+        
+        async function runAllTests() {
+            const results = document.getElementById('results');
+            results.innerHTML = '';
+            
+            // 测试1: 直接访问健康检查
+            await testEndpoint('Health Check', `${API_URL}/api/health`, 'GET');
+            
+            // 测试2: CORS测试端点
+            await testEndpoint('CORS Test', `${API_URL}/api/cors-test`, 'GET');
+            
+            // 测试3: OPTIONS预检请求
+            await testEndpoint('OPTIONS Preflight', `${API_URL}/api/spreads`, 'OPTIONS');
+            
+            // 测试4: 实际API请求
+            await testEndpoint('Spreads API', `${API_URL}/api/spreads`, 'GET');
+            
+            // 测试5: 使用fetch的不同模式
+            await testWithDifferentModes();
+        }
+        
+        async function testEndpoint(name, url, method) {
+            const results = document.getElementById('results');
+            const testDiv = document.createElement('div');
+            testDiv.className = 'test';
+            
+            try {
+                const response = await fetch(url, {
+                    method: method,
+                    headers: {
+                        'Content-Type': 'application/json',
+                    }
+                });
+                
+                const headers = {};
+                response.headers.forEach((value, key) => {
+                    headers[key] = value;
+                });
+                
+                const data = method === 'OPTIONS' ? 'OPTIONS request successful' : await response.json();
+                
+                testDiv.className += ' success';
+                testDiv.innerHTML = `
+                    <h3>✅ ${name}</h3>
+                    <p>Status: ${response.status}</p>
+                    <p>Headers:</p>
+                    <pre>${JSON.stringify(headers, null, 2)}</pre>
+                    <p>Response:</p>
+                    <pre>${JSON.stringify(data, null, 2)}</pre>
+                `;
+            } catch (error) {
+                testDiv.className += ' error';
+                testDiv.innerHTML = `
+                    <h3>❌ ${name}</h3>
+                    <p>Error: ${error.message}</p>
+                    <pre>${error.stack}</pre>
+                `;
+            }
+            
+            results.appendChild(testDiv);
+        }
+        
+        async function testWithDifferentModes() {
+            const results = document.getElementById('results');
+            const testDiv = document.createElement('div');
+            testDiv.className = 'test';
+            
+            let content = '<h3>不同请求模式测试</h3>';
+            
+            // no-cors模式
+            try {
+                const response = await fetch(`${API_URL}/api/health`, {
+                    mode: 'no-cors'
+                });
+                content += '<p>✅ no-cors模式: 请求成功（但无法读取响应）</p>';
+            } catch (error) {
+                content += `<p>❌ no-cors模式: ${error.message}</p>`;
+            }
+            
+            // cors模式（默认）
+            try {
+                const response = await fetch(`${API_URL}/api/health`, {
+                    mode: 'cors'
+                });
+                const data = await response.json();
+                content += `<p>✅ cors模式: ${JSON.stringify(data)}</p>`;
+            } catch (error) {
+                content += `<p>❌ cors模式: ${error.message}</p>`;
+            }
+            
+            testDiv.innerHTML = content;
+            results.appendChild(testDiv);
+        }
+        
+        // 自动运行测试
+        window.onload = () => {
+            runAllTests();
+        };
+    </script>
+</body>
+</html>

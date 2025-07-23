@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>CORS详细测试</title>
+</head>
+<body>
+    <h1>CORS详细测试</h1>
+    <button onclick="testAPI()">测试API</button>
+    <pre id="result"></pre>
+
+    <script>
+        async function testAPI() {
+            const result = document.getElementById('result');
+            result.textContent = '测试中...\n';
+            
+            const url = 'https://tarot-app-production-3381.up.railway.app/api/health';
+            
+            try {
+                // 先用curl测试（这会被CORS阻止，但能看到错误）
+                result.textContent += '\n正在测试: ' + url + '\n';
+                
+                const response = await fetch(url, {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    mode: 'cors'
+                });
+                
+                result.textContent += '状态码: ' + response.status + '\n';
+                result.textContent += '响应头:\n';
+                
+                response.headers.forEach((value, key) => {
+                    result.textContent += key + ': ' + value + '\n';
+                });
+                
+                const data = await response.json();
+                result.textContent += '\n响应数据: ' + JSON.stringify(data, null, 2);
+                
+            } catch (error) {
+                result.textContent += '\n错误类型: ' + error.name + '\n';
+                result.textContent += '错误消息: ' + error.message + '\n';
+                result.textContent += '\n完整错误:\n' + error.stack;
+                
+                // 在控制台也打印，方便查看
+                console.error('CORS Error Details:', error);
+            }
+        }
+        
+        // 页面加载时自动运行
+        window.onload = () => {
+            testAPI();
+        };
+    </script>
+</body>
+</html>

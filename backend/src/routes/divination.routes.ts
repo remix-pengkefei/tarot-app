@@ -1,4 +1,4 @@
-import { Router } from 'express';
+import { Router, Request, Response } from 'express';
 import { divinationService } from '../services/divination.service';
 import { validateRequest } from '../middleware/validateRequest';
 import Joi from 'joi';
@@ -12,7 +12,7 @@ router.post('/start',
       question: Joi.string().min(5).max(500).required()
     })
   }),
-  async (req, res) => {
+  async (req: Request, res: Response) => {
     const result = await divinationService.analyzeQuestionAndRecommendSpread(req.body);
     res.json(result);
   }
@@ -32,14 +32,14 @@ router.post('/draw-cards',
       ).required()
     })
   }),
-  async (req, res) => {
+  async (req: Request, res: Response) => {
     const result = await divinationService.drawAndInterpretCards(req.body);
     res.json(result);
   }
 );
 
 // Get divination result
-router.get('/:id', async (req, res) => {
+router.get('/:id', async (req: Request, res: Response) => {
   const result = await divinationService.getDivinationResult(req.params.id);
   res.json(result);
 });

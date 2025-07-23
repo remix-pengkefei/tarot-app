@@ -1,11 +1,11 @@
-import { Router } from 'express';
+import { Router, Request, Response } from 'express';
 import { PrismaClient } from '@prisma/client';
 
 const router = Router();
 const prisma = new PrismaClient();
 
 // Get all spreads
-router.get('/', async (_req, res) => {
+router.get('/', async (_req: Request, res: Response) => {
   const spreads = await prisma.spread.findMany({
     orderBy: { cardCount: 'asc' }
   });
@@ -13,7 +13,7 @@ router.get('/', async (_req, res) => {
 });
 
 // Get a specific spread
-router.get('/:id', async (req, res) => {
+router.get('/:id', async (req: Request, res: Response) => {
   const spread = await prisma.spread.findUnique({
     where: { id: parseInt(req.params.id) }
   });
