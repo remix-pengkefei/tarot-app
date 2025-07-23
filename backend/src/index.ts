@@ -16,7 +16,7 @@ const PORT = process.env.PORT || 3001;
 app.use(corsMiddleware);
 
 // 日志中间件
-app.use((req, res, next) => {
+app.use((req, _res, next) => {
   console.log(`${new Date().toISOString()} - ${req.method} ${req.path}`);
   console.log('Headers:', req.headers);
   next();
