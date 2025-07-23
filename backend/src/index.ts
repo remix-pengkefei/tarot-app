@@ -85,8 +85,65 @@ app.get('/', (_req: Request, res: Response) => {
 // Error handling middleware (must be last)
 app.use(errorHandler);
 
-app.listen(PORT, () => {
-  console.log(`Server is running on port ${PORT}`);
-  console.log(`CORS headers will be added to all responses`);
-  console.log(`Environment: ${process.env.NODE_ENV}`);
+// 启动前初始化数据库
+async function initializeDatabase() {
+  try {
+    const { PrismaClient } = await import('@prisma/client');
+    const prisma = new PrismaClient();
+    
+    // 检查是否有数据
+    const spreadCount = await prisma.spread.count();
+    if (spreadCount === 0) {
+      console.log('No spreads found, creating default spreads...');
+      // 创建基本的牌阵
+      await prisma.spread.createMany({
+        data: [
+          {
+            name: '单牌阵',
+            description: '快速获得对问题的洞察',
+            cardCount: 1,
+            positions: JSON.stringify([
+              { name: '答案', meaning: '对您问题的直接回应' }
+            ])
+          },
+          {
+            name: '三牌阵',
+            description: '过去、现在、未来的经典牌阵',
+            cardCount: 3,
+            positions: JSON.stringify([
+              { name: '过去', meaning: '影响当前状况的过去因素' },
+              { name: '现在', meaning: '当前的状况和挑战' },
+              { name: '未来', meaning: '可能的发展方向' }
+            ])
+          },
+          {
+            name: '五牌十字阵',
+            description: '深入了解问题的各个方面',
+            cardCount: 5,
+            positions: JSON.stringify([
+              { name: '现状', meaning: '当前的情况' },
+              { name: '挑战', meaning: '面临的困难或阻碍' },
+              { name: '过去', meaning: '导致现状的原因' },
+              { name: '未来', meaning: '可能的结果' },
+              { name: '建议', meaning: '行动指南' }
+            ])
+          }
+        ]
+      });
+      console.log('Default spreads created successfully!');
+    }
+    
+    await prisma.$disconnect();
+  } catch (error) {
+    console.error('Database initialization error:', error);
+  }
+}
+
+// 先初始化数据库，再启动服务器
+initializeDatabase().then(() => {
+  app.listen(PORT, () => {
+    console.log(`Server is running on port ${PORT}`);
+    console.log(`CORS headers will be added to all responses`);
+    console.log(`Environment: ${process.env.NODE_ENV}`);
+  });
 });

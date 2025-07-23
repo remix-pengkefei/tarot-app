@@ -180,6 +180,11 @@ ${cardsDescription}
 
   // Enhanced fallback methods with rich mock data (复制自 claude.service.ts)
   getSimpleSpreadRecommendation(question: string, spreads: Spread[]): AnalyzeQuestionResult {
+    // 确保有可用的牌阵
+    if (!spreads || spreads.length === 0) {
+      throw new Error('No spreads available in database. Please run database seed.');
+    }
+    
     const questionLower = question.toLowerCase();
     let recommendedSpread: Spread;
     let analysis: string;
@@ -204,9 +209,9 @@ ${cardsDescription}
       recommendation = '凯尔特十字牌阵是最全面的牌阵之一，它能从多个角度深入剖析问题，帮您看清事情的全貌。';
     } else {
       // 默认推荐
-      recommendedSpread = spreads.find(s => s.cardCount === 3) || spreads[1];
+      recommendedSpread = spreads.find(s => s.cardCount === 3) || spreads[1] || spreads[0];
       analysis = '您的问题触及了生活中的重要主题。每个问题都是成长的契机，让我们通过塔罗牌的智慧来探索答案。';
-      recommendation = `${recommendedSpread.name}能够为您提供全面而深入的洞察，帮助您理解当前的处境。`;
+      recommendation = `${recommendedSpread?.name || '塔罗牌阵'}能够为您提供全面而深入的洞察，帮助您理解当前的处境。`;
     }
 
     return {
