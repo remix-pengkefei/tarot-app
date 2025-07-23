@@ -1,5 +1,4 @@
 import express from 'express';
-import cors from 'cors';
 import dotenv from 'dotenv';
 import 'express-async-errors';
 import { errorHandler } from './middleware/errorHandler';
@@ -12,33 +11,49 @@ dotenv.config();
 const app = express();
 const PORT = process.env.PORT || 3001;
 
-// 使用cors包，而不是手动设置
-const corsOptions = {
-  origin: function (origin, callback) {
-    // 允许所有origin
-    callback(null, true);
-  },
-  credentials: true,
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
-  optionsSuccessStatus: 200
-};
+// 强制在每个响应中添加CORS头
+app.use((req, res, next) => {
+  // 在响应发送前添加CORS头
+  const originalSend = res.send;
+  res.send = function(data) {
+    res.header('Access-Control-Allow-Origin', '*');
+    res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+    res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization');
+    return originalSend.call(this, data);
+  };
+  
+  // 处理OPTIONS预检请求
+  if (req.method === 'OPTIONS') {
+    res.header('Access-Control-Allow-Origin', '*');
+    res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+    res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization');
+    return res.sendStatus(200);
+  }
+  
+  next();
+});
 
-app.use(cors(corsOptions));
 app.use(express.json());
 
-// Routes
+// Routes - 在每个路由响应前也添加CORS头
+app.use((req, res, next) => {
+  res.header('Access-Control-Allow-Origin', '*');
+  next();
+});
+
 app.use('/api/divination', divinationRouter);
 app.use('/api/tarot', tarotRouter);
 app.use('/api/spreads', spreadRouter);
 
 // Health check
 app.get('/api/health', (_req, res) => {
+  res.header('Access-Control-Allow-Origin', '*');
   res.json({ status: 'ok', timestamp: new Date().toISOString() });
 });
 
 // CORS测试端点
 app.get('/api/cors-test', (req, res) => {
+  res.header('Access-Control-Allow-Origin', '*');
   res.json({ 
     message: 'CORS test successful',
     headers: req.headers,
@@ -49,6 +64,7 @@ app.get('/api/cors-test', (req, res) => {
 
 // 根路径
 app.get('/', (_req, res) => {
+  res.header('Access-Control-Allow-Origin', '*');
   res.json({ message: 'Tarot API is running', timestamp: new Date().toISOString() });
 });
 
@@ -57,6 +73,6 @@ app.use(errorHandler);
 
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
-  console.log(`CORS is enabled for all origins`);
+  console.log(`CORS headers will be added to all responses`);
   console.log(`Environment: ${process.env.NODE_ENV}`);
 });
