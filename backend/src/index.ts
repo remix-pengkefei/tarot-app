@@ -91,7 +91,7 @@ async function initializeDatabase() {
     const { PrismaClient } = await import('@prisma/client');
     const prisma = new PrismaClient();
     
-    // 检查是否有数据
+    // 检查牌阵
     const spreadCount = await prisma.spread.count();
     if (spreadCount === 0) {
       console.log('No spreads found, creating default spreads...');
@@ -131,6 +131,51 @@ async function initializeDatabase() {
         ]
       });
       console.log('Default spreads created successfully!');
+    }
+    
+    // 检查塔罗牌
+    const cardCount = await prisma.tarotCard.count();
+    if (cardCount === 0) {
+      console.log('No tarot cards found, creating Major Arcana...');
+      
+      // 创建大阿卡纳
+      const majorArcana = [
+        { number: 0, name: '愚者', keywords: ['新开始', '冒险', '天真', '自由'] },
+        { number: 1, name: '魔术师', keywords: ['创造力', '技能', '意志力', '行动'] },
+        { number: 2, name: '女祭司', keywords: ['直觉', '潜意识', '神秘', '智慧'] },
+        { number: 3, name: '女皇', keywords: ['丰饶', '母性', '创造', '自然'] },
+        { number: 4, name: '皇帝', keywords: ['权威', '结构', '控制', '父性'] },
+        { number: 5, name: '教皇', keywords: ['传统', '信仰', '教育', '精神指引'] },
+        { number: 6, name: '恋人', keywords: ['爱情', '选择', '结合', '价值观'] },
+        { number: 7, name: '战车', keywords: ['胜利', '意志', '控制', '决心'] },
+        { number: 8, name: '力量', keywords: ['勇气', '耐心', '内在力量', '温柔'] },
+        { number: 9, name: '隐士', keywords: ['内省', '寻求', '智慧', '孤独'] },
+        { number: 10, name: '命运之轮', keywords: ['周期', '命运', '转折', '机遇'] },
+        { number: 11, name: '正义', keywords: ['公正', '平衡', '真相', '因果'] },
+        { number: 12, name: '倒吊人', keywords: ['牺牲', '等待', '新视角', '放手'] },
+        { number: 13, name: '死神', keywords: ['结束', '转变', '重生', '放下'] },
+        { number: 14, name: '节制', keywords: ['平衡', '耐心', '调和', '适度'] },
+        { number: 15, name: '恶魔', keywords: ['束缚', '物质', '诱惑', '执着'] },
+        { number: 16, name: '塔', keywords: ['突变', '破坏', '觉醒', '解放'] },
+        { number: 17, name: '星星', keywords: ['希望', '灵感', '宁静', '信念'] },
+        { number: 18, name: '月亮', keywords: ['幻觉', '恐惧', '潜意识', '直觉'] },
+        { number: 19, name: '太阳', keywords: ['成功', '活力', '喜悦', '积极'] },
+        { number: 20, name: '审判', keywords: ['复活', '评估', '觉醒', '召唤'] },
+        { number: 21, name: '世界', keywords: ['完成', '成就', '圆满', '整合'] }
+      ];
+
+      await prisma.tarotCard.createMany({
+        data: majorArcana.map(card => ({
+          name: card.name,
+          arcana: 'Major',
+          number: card.number,
+          keywords: card.keywords.join(','),
+          uprightMeaning: `${card.name}正位代表${card.keywords.slice(0, 2).join('、')}的能量。这是关于${card.keywords[0]}的时刻。`,
+          reversedMeaning: `${card.name}逆位可能暗示${card.keywords[0]}的缺失或过度，需要重新审视${card.keywords[1]}。`
+        }))
+      });
+      
+      console.log('Tarot cards created successfully!');
     }
     
     await prisma.$disconnect();
