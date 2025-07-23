@@ -13,26 +13,36 @@ const spread_routes_1 = require("./routes/spread.routes");
 dotenv_1.default.config();
 const app = (0, express_1.default)();
 const PORT = process.env.PORT || 3001;
+const allowedOrigins = process.env.NODE_ENV === 'production'
+    ? [process.env.CORS_ORIGIN || process.env.FRONTEND_URL].filter(Boolean)
+    : ['http://localhost:5173', 'http://localhost:3000', 'http://127.0.0.1:5173'];
 app.use((req, res, next) => {
+    const origin = req.headers.origin;
+    const allowedOrigin = allowedOrigins.includes(origin) ? origin : allowedOrigins[0];
     const originalSend = res.send;
     res.send = function (data) {
-        res.header('Access-Control-Allow-Origin', '*');
+        res.header('Access-Control-Allow-Origin', allowedOrigin || '*');
         res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
         res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization');
+        res.header('Access-Control-Allow-Credentials', 'true');
         return originalSend.call(this, data);
     };
     if (req.method === 'OPTIONS') {
-        res.header('Access-Control-Allow-Origin', '*');
+        res.header('Access-Control-Allow-Origin', allowedOrigin || '*');
         res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
         res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization');
+        res.header('Access-Control-Allow-Credentials', 'true');
         res.sendStatus(200);
         return;
     }
     next();
 });
 app.use(express_1.default.json());
-app.use((_req, res, next) => {
-    res.header('Access-Control-Allow-Origin', '*');
+app.use((req, res, next) => {
+    const origin = req.headers.origin;
+    const allowedOrigin = allowedOrigins.includes(origin) ? origin : allowedOrigins[0];
+    res.header('Access-Control-Allow-Origin', allowedOrigin || '*');
+    res.header('Access-Control-Allow-Credentials', 'true');
     next();
 });
 app.use('/api/divination', divination_routes_1.divinationRouter);
