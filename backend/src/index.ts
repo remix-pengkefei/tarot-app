@@ -1,4 +1,5 @@
 import express from 'express';
+import cors from 'cors';
 import dotenv from 'dotenv';
 import 'express-async-errors';
 import { errorHandler } from './middleware/errorHandler';
@@ -11,28 +12,19 @@ dotenv.config();
 const app = express();
 const PORT = process.env.PORT || 3001;
 
-// 最简单直接的CORS解决方案
-app.use((req, res, next) => {
-  const origin = req.headers.origin;
-  
-  // 如果有origin，使用它；否则使用*
-  if (origin) {
-    res.header('Access-Control-Allow-Origin', origin);
-    res.header('Access-Control-Allow-Credentials', 'true');
-  } else {
-    res.header('Access-Control-Allow-Origin', '*');
-  }
-  
-  res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
-  res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization');
-  
-  if (req.method === 'OPTIONS') {
-    return res.sendStatus(200);
-  }
-  
-  next();
-});
+// 使用cors包，而不是手动设置
+const corsOptions = {
+  origin: function (origin, callback) {
+    // 允许所有origin
+    callback(null, true);
+  },
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
+  optionsSuccessStatus: 200
+};
 
+app.use(cors(corsOptions));
 app.use(express.json());
 
 // Routes
