@@ -1,7 +1,6 @@
 import express from 'express';
 import dotenv from 'dotenv';
 import 'express-async-errors';
-import { corsMiddleware } from './cors-fix';
 import { errorHandler } from './middleware/errorHandler';
 import { divinationRouter } from './routes/divination.routes';
 import { tarotRouter } from './routes/tarot.routes';
@@ -12,13 +11,25 @@ dotenv.config();
 const app = express();
 const PORT = process.env.PORT || 3001;
 
-// 最优先的CORS中间件
-app.use(corsMiddleware);
-
-// 日志中间件
-app.use((req, _res, next) => {
-  console.log(`${new Date().toISOString()} - ${req.method} ${req.path}`);
-  console.log('Headers:', req.headers);
+// 最简单直接的CORS解决方案
+app.use((req, res, next) => {
+  const origin = req.headers.origin;
+  
+  // 如果有origin，使用它；否则使用*
+  if (origin) {
+    res.header('Access-Control-Allow-Origin', origin);
+    res.header('Access-Control-Allow-Credentials', 'true');
+  } else {
+    res.header('Access-Control-Allow-Origin', '*');
+  }
+  
+  res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+  res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization');
+  
+  if (req.method === 'OPTIONS') {
+    return res.sendStatus(200);
+  }
+  
   next();
 });
 
