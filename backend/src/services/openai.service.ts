@@ -34,9 +34,9 @@ ${availableSpreads.map(spread => `
   适用场景：${JSON.parse(spread.positions as string).map((p: any) => p.meaning).join('、')}
 `).join('\n')}
 
-请返回以下格式的JSON响应：
+请严格返回以下格式的JSON响应，recommendedSpreadId必须是数字：
 {
-  "recommendedSpreadId": <推荐牌阵的ID>,
+  "recommendedSpreadId": <推荐牌阵的数字ID，只能是${availableSpreads.map(s => s.id).join('、')}中的一个>,
   "analysis": "<对问题的简要分析>",
   "recommendation": "<为什么推荐这个牌阵的原因>"
 }`;
@@ -61,12 +61,40 @@ ${availableSpreads.map(spread => `
       }
 
       const result = JSON.parse(content);
+      
+      // 验证返回的数据
+      if (!result.recommendedSpreadId || !result.analysis || !result.recommendation) {
+        console.error('Invalid OpenAI response format:', result);
+        throw new Error('Invalid response format');
+      }
+      
+      // 确保 recommendedSpreadId 是有效的
+      const validSpread = availableSpreads.find(s => s.id === result.recommendedSpreadId);
+      if (!validSpread) {
+        console.error('Invalid spread ID from OpenAI:', result.recommendedSpreadId);
+        // 使用第一个可用的牌阵
+        result.recommendedSpreadId = availableSpreads[0].id;
+      }
+      
       return result;
     } catch (error) {
       console.error('OpenAI API error:', error);
+      console.error('Failed question:', question);
+      console.error('Available spreads:', availableSpreads.map(s => ({ id: s.id, name: s.name })));
+      
       // Fallback to simple logic
-      const simpleRecommendation = this.getSimpleSpreadRecommendation(question, availableSpreads);
-      return simpleRecommendation;
+      try {
+        const simpleRecommendation = this.getSimpleSpreadRecommendation(question, availableSpreads);
+        return simpleRecommendation;
+      } catch (fallbackError) {
+        console.error('Fallback also failed:', fallbackError);
+        // 最后的保底方案
+        return {
+          recommendedSpreadId: availableSpreads[0].id,
+          analysis: '让我们通过塔罗牌来探索您的问题。每个问题都蕴含着独特的能量和可能性。',
+          recommendation: '我推荐这个牌阵来帮助您获得所需的洞察。'
+        };
+      }
     }
   },
 
@@ -192,7 +220,7 @@ ${cardsDescription}
 
     // 分析问题类型
     if (questionLower.includes('爱情') || questionLower.includes('感情') || questionLower.includes('恋爱') || questionLower.includes('喜欢')) {
-      recommendedSpread = spreads.find(s => s.cardCount === 3) || spreads[1];
+      recommendedSpread = spreads.find(s => s.cardCount === 3) || spreads[1] || spreads[0];
       analysis = '您的问题涉及到感情和人际关系。爱情是生命中最神秘的力量之一，它需要我们用心去感受和理解。通过塔罗牌，我们可以探索内心深处的情感需求和关系模式。';
       recommendation = '三张牌阵特别适合探索感情的发展脉络，它能帮您看清过去的影响、现在的状态，以及可能的未来走向。';
     } else if (questionLower.includes('工作') || questionLower.includes('事业') || questionLower.includes('职业') || questionLower.includes('工作')) {
