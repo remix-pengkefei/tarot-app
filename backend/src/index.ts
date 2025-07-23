@@ -1,7 +1,7 @@
 import express from 'express';
-import cors from 'cors';
 import dotenv from 'dotenv';
 import 'express-async-errors';
+import { corsMiddleware } from './cors-fix';
 import { errorHandler } from './middleware/errorHandler';
 import { divinationRouter } from './routes/divination.routes';
 import { tarotRouter } from './routes/tarot.routes';
@@ -12,40 +12,15 @@ dotenv.config();
 const app = express();
 const PORT = process.env.PORT || 3001;
 
-// 手动设置CORS头 - 最彻底的解决方案
+// 最优先的CORS中间件
+app.use(corsMiddleware);
+
+// 日志中间件
 app.use((req, res, next) => {
-  // 允许所有来源
-  res.header('Access-Control-Allow-Origin', '*');
-  
-  // 允许的请求头
-  res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization');
-  
-  // 允许的方法
-  res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
-  
-  // 允许credentials
-  res.header('Access-Control-Allow-Credentials', 'true');
-  
-  // 处理预检请求
-  if (req.method === 'OPTIONS') {
-    res.sendStatus(200);
-  } else {
-    next();
-  }
+  console.log(`${new Date().toISOString()} - ${req.method} ${req.path}`);
+  console.log('Headers:', req.headers);
+  next();
 });
-
-// 备用CORS中间件
-app.use(cors({
-  origin: true, // 允许所有来源
-  credentials: true,
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
-  optionsSuccessStatus: 200
-}));
-
-console.log('CORS configured with manual headers');
-console.log('Environment:', process.env.NODE_ENV);
-console.log('Port:', PORT);
 
 app.use(express.json());
 
@@ -80,4 +55,5 @@ app.use(errorHandler);
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
   console.log(`CORS is enabled for all origins`);
+  console.log(`Environment: ${process.env.NODE_ENV}`);
 });
