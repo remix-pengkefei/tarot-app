@@ -9,6 +9,7 @@ const CardDrawingPage = () => {
     currentDivination, 
     shuffledCards, 
     drawCards: submitDrawnCards,
+    shuffleCards,
     isLoading 
   } = useDivinationStore();
   
@@ -25,10 +26,13 @@ const CardDrawingPage = () => {
     const positions = JSON.parse(currentDivination.spread.positions as any);
     setCardPositions(positions.map((p: any) => p.name));
     
-    setTimeout(() => {
-      setIsShuffling(false);
-    }, 1000);
-  }, [currentDivination, navigate]);
+    // 洗牌获取卡牌数据
+    shuffleCards().then(() => {
+      setTimeout(() => {
+        setIsShuffling(false);
+      }, 1000);
+    });
+  }, [currentDivination, navigate, shuffleCards]);
 
   const handleCardSelect = (cardId: number) => {
     if (!currentDivination || selectedCards.length >= currentDivination.spread.cardCount) {
